@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Page not found{% endblock %}
+
+{% block content %}
+<div class="empty-state">
+  <div class="error-code">404</div>
+  <h1 class="h3 mt-2">We can't find that page</h1>
+  <p>The link may be broken, or the page may not belong to your account.</p>
+  {% url 'home' as home_url %}
+  <a class="btn btn-primary-app" href="{{ home_url|default:'/' }}">Back to home</a>
+</div>
+{% endblock %}

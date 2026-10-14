@@ -1,3 +1,156 @@
-body {
-    background: #a1a1a1f0;
+/* Task Tracker theme: ink + violet, one sunny accent. */
+:root {
+  --bg: #f5f4ff;
+  --surface: #ffffff;
+  --ink: #1b1640;
+  --muted: #6b678a;
+  --line: #e4e1f7;
+  --primary: #5b3df5;
+  --primary-ink: #ffffff;
+  --accent: #ffd23f;
+
+  --s-todo: #8b88a6;
+  --s-doing: #f2a516;
+  --s-done: #1fa971;
+  --s-overdue: #e5484d;
+
+  --p-low: #3b82c4;
+  --p-medium: #f2a516;
+  --p-high: #e5484d;
+
+  --radius: 14px;
+  --shadow: 0 1px 2px rgba(27, 22, 64, .06), 0 6px 18px rgba(27, 22, 64, .06);
+  --font-display: "Bricolage Grotesque", system-ui, sans-serif;
+  --font-body: "DM Sans", system-ui, sans-serif;
+}
+
+[data-theme="dark"] {
+  --bg: #12102a;
+  --surface: #1c1940;
+  --ink: #f1efff;
+  --muted: #a29fc4;
+  --line: #2f2b5e;
+  --primary: #8b73ff;
+  --primary-ink: #12102a;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 6px 18px rgba(0, 0, 0, .25);
+}
+
+/* ---------- Base ---------- */
+html, body { background: var(--bg); color: var(--ink); }
+body { font-family: var(--font-body); min-height: 100vh; display: flex; flex-direction: column; }
+h1, h2, h3, h4, h5, .brand { font-family: var(--font-display); font-weight: 700; letter-spacing: -.01em; }
+.page { flex: 1; padding-top: 2rem; padding-bottom: 5rem; }
+a { color: var(--primary); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- Navbar ---------- */
+.app-nav { background: var(--surface); border-bottom: 1px solid var(--line); }
+.brand { color: var(--ink) !important; font-size: 1.4rem; }
+.brand .bi { color: var(--primary); }
+.app-nav .nav-link { color: var(--muted); font-weight: 500; border-radius: 10px; padding: .45rem .8rem; }
+.app-nav .nav-link:hover { color: var(--ink); background: var(--bg); }
+.app-nav .nav-link.active { color: var(--primary); background: var(--bg); }
+.nav-staff .bi { margin-right: .2rem; }
+.navbar-toggler { border-color: var(--line); }
+[data-theme="dark"] .navbar-toggler-icon { filter: invert(1); }
+
+.btn-icon { background: transparent; border: 1px solid var(--line); color: var(--ink); border-radius: 10px; width: 40px; height: 40px; }
+.btn-icon:hover { background: var(--bg); }
+.icon-sun { display: none; }
+[data-theme="dark"] .icon-sun { display: inline; }
+[data-theme="dark"] .icon-moon { display: none; }
+
+.btn-user { display: flex; align-items: center; gap: .5rem; color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: .25rem .8rem .25rem .3rem; background: transparent; }
+.avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: #1b1640; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; }
+.dropdown-menu { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+.dropdown-item { color: var(--ink); }
+.dropdown-item:hover { background: var(--bg); color: var(--ink); }
+
+/* ---------- Buttons ---------- */
+.btn { border-radius: 10px; font-weight: 500; transition: transform .1s ease, box-shadow .15s ease, background .15s ease; }
+.btn:active { transform: translateY(2px) scale(.98); }
+.btn-primary-app { background: var(--primary); color: var(--primary-ink); border: 0; }
+.btn-primary-app:hover { color: var(--primary-ink); box-shadow: 0 6px 16px rgba(91, 61, 245, .35); }
+.btn-ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+.btn-ghost:hover { background: var(--bg); color: var(--ink); }
+.btn-danger-app { background: var(--s-overdue); color: #fff; border: 0; }
+.btn-danger-app:hover { color: #fff; box-shadow: 0 6px 16px rgba(229, 72, 77, .35); }
+
+/* ---------- Cards, badges, progress ---------- */
+.card-app { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.25rem; }
+a.card-app { display: block; color: inherit; text-decoration: none; transition: transform .15s ease; }
+a.card-app:hover { transform: translateY(-3px); }
+
+.pill { display: inline-block; padding: .15rem .65rem; border-radius: 999px; font-size: .8rem; font-weight: 700; color: #fff; }
+/* status: values come from Task.Status */
+.pill-todo { background: var(--s-todo); }
+.pill-doing { background: var(--s-doing); color: #1b1640; }
+.pill-done { background: var(--s-done); }
+.pill-overdue { background: var(--s-overdue); }
+/* priority: values come from Task.Priority */
+.pill-low { background: var(--p-low); }
+.pill-medium { background: var(--p-medium); color: #1b1640; }
+.pill-high { background: var(--p-high); }
+
+.progress-app { height: 10px; border-radius: 999px; background: var(--line); overflow: hidden; }
+.progress-app > span { display: block; height: 100%; background: var(--primary); border-radius: 999px;
+  transform-origin: left; animation: fill 900ms cubic-bezier(.2, .8, .2, 1) both; }
+@keyframes fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* Task completed: add .pop to the checkmark when status becomes done */
+.pop { animation: pop .35s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes pop { 0% { transform: scale(.6); } 100% { transform: scale(1); } }
+
+/* ---------- Forms ---------- */
+.form-control, .form-select { background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; }
+.form-control:focus, .form-select:focus { background: var(--surface); color: var(--ink); border-color: var(--primary); box-shadow: 0 0 0 .2rem rgba(91, 61, 245, .2); }
+
+/* Wrap a Django form in .form-stack and its raw inputs get styled too,
+   because the views' forms don't add Bootstrap classes themselves. */
+.form-stack .field { margin-bottom: 1rem; }
+.form-stack label { display: block; font-weight: 500; margin-bottom: .3rem; }
+.form-stack input:not([type=hidden]):not([type=checkbox]):not([type=radio]),
+.form-stack textarea, .form-stack select {
+  width: 100%; padding: .55rem .8rem; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line); border-radius: 10px; font: inherit; }
+.form-stack input:focus, .form-stack textarea:focus, .form-stack select:focus {
+  outline: none; border-color: var(--primary); box-shadow: 0 0 0 .2rem rgba(91, 61, 245, .2); }
+.form-stack .helptext, .form-stack .help { color: var(--muted); font-size: .85rem; margin-top: .25rem; }
+.form-stack .help ul { padding-left: 1.1rem; margin: 0; }
+.form-stack .errors { color: var(--s-overdue); font-size: .9rem; margin: .3rem 0 0; padding: 0; list-style: none; }
+
+/* ---------- Auth pages and 404 ---------- */
+.auth-wrap { max-width: 440px; margin: 2rem auto; }
+.auth-card { border-top: 5px solid var(--accent); }
+.auth-card h1 { font-size: 1.7rem; margin-bottom: .25rem; }
+.auth-sub { color: var(--muted); margin-bottom: 1.5rem; }
+.auth-alt { text-align: center; margin: 1.25rem 0 0; color: var(--muted); }
+
+.empty-state { text-align: center; padding: 3rem 1rem; color: var(--muted); }
+.empty-state .bi { font-size: 2.5rem; color: var(--primary); }
+.error-code { font-family: var(--font-display); font-size: 6rem; font-weight: 800; line-height: 1; color: var(--primary); }
+
+/* ---------- Flash messages ---------- */
+.toast-stack { position: fixed; top: 76px; left: 50%; transform: translateX(-50%); z-index: 1080; display: grid; gap: .5rem; width: min(92vw, 420px); }
+.toast-msg { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: .75rem 1rem; border-radius: var(--radius); background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line); border-left: 6px solid var(--primary); box-shadow: var(--shadow); animation: toast-in .3s ease both; }
+.toast-msg.is-leaving { opacity: 0; transform: translateY(-8px); transition: all .25s ease; }
+.toast-success { border-left-color: var(--s-done); }
+.toast-error { border-left-color: var(--s-overdue); }
+.toast-warning { border-left-color: var(--s-doing); }
+.toast-close { background: none; border: 0; color: var(--muted); font-size: 1.3rem; line-height: 1; }
+@keyframes toast-in { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ---------- Floating action button (mobile) ---------- */
+.fab { position: fixed; right: 1.25rem; bottom: 1.25rem; width: 56px; height: 56px; border-radius: 50%; background: var(--primary); color: var(--primary-ink);
+  display: none; align-items: center; justify-content: center; font-size: 1.6rem; box-shadow: 0 8px 20px rgba(91, 61, 245, .4); text-decoration: none; z-index: 1000; }
+.fab:hover { color: var(--primary-ink); }
+@media (max-width: 991.98px) { .fab { display: flex; } }
+
+/* ---------- Footer ---------- */
+.app-footer { border-top: 1px solid var(--line); color: var(--muted); padding: 1rem 0; font-size: .9rem; }
+
+/* ---------- Accessibility ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }

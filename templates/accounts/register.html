@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Sign up{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="card-app auth-card">
+    <h1>Create your account</h1>
+    <p class="auth-sub">It takes less than a minute.</p>
+
+    <form method="post" class="form-stack" novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        <ul class="errors">{% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}</ul>
+      {% endif %}
+
+      {% for field in form %}
+      <div class="field">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}
+          <ul class="errors">{% for e in field.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+        {% if field.help_text %}<div class="help">{{ field.help_text|safe }}</div>{% endif %}
+      </div>
+      {% endfor %}
+
+      <button type="submit" class="btn btn-primary-app w-100">Sign up</button>
+    </form>
+
+    {% url 'login' as login_url %}
+    {% if login_url %}
+    <p class="auth-alt">Already have an account? <a href="{{ login_url }}">Log in</a></p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
