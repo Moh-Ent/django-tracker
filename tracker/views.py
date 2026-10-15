@@ -4,9 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import redirect
 from .activity import log_action
-from .forms import ProjectForm
-from .models import ActivityLog, Project
-
+from .forms import ProjectForm, TaskForm
+from .models import ActivityLog, Project, Task
 
 
 
@@ -63,3 +62,19 @@ def project_delete(request, pk):
         messages.success(request, 'Project deleted.')
         return redirect('project_list')
     return render(request, 'tracker/project_confirm_delete.html', {'project': project})
+
+@login_required
+def task_create(request, project_pk):
+    project = get_object_or_404(Project, pk=project_pk, owner=request.user)
+    if request.method == 'POST':
+        form = TaskForm(request.POST)
+        if form.is_valid():
+            task = form.save(commit=False)
+            task.project = project
+            task.save()
+            log_action(request.user, ActivityLog.Action.CREATED, task)
+            messages.success(request, 'Task created.')
+            return redirect('project_detail', pk=project.pk)
+    else:
+        form = TaskForm()
+    return render(request, 'tracker/task_form.html', {'form': form, 'project': project})
