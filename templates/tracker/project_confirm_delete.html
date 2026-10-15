@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Delete project{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="card-app auth-card danger-card">
+    <h1>Delete this project?</h1>
+    <p class="auth-sub">
+      <strong>{{ project.name }}</strong> and its {{ project.tasks.count }} task{{ project.tasks.count|pluralize }}
+      will be removed for good. This cannot be undone.
+    </p>
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="actions">
+        <button type="submit" class="btn btn-danger-app">Yes, delete it</button>
+        <a class="btn btn-ghost" href="{% url 'project_detail' project.pk %}">Keep it</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

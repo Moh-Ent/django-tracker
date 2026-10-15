@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}{{ task.title }}{% endblock %}
+
+{% block content %}
+<a class="back-link" href="{% url 'project_detail' task.project.pk %}"><i class="bi bi-arrow-left"></i> {{ task.project.name }}</a>
+
+<div class="page-head">
+  <div>
+    <h1>
+      {% if task.status == 'done' %}<i class="bi bi-check-circle-fill text-done pop"></i>{% endif %}
+      {{ task.title }}
+    </h1>
+    <div class="meta-list">
+      <span class="pill pill-{{ task.status }}">{{ task.get_status_display }}</span>
+      <span class="pill pill-{{ task.priority }}">{{ task.get_priority_display }} priority</span>
+      <span><i class="bi bi-calendar-event"></i> {% if task.due_date %}{{ task.due_date|date:"D, M j" }}{% else %}No due date{% endif %}</span>
+      <span><i class="bi bi-clock"></i> Created {{ task.created_at|date:"M j" }}</span>
+    </div>
+  </div>
+  <div class="actions">
+    {# Optional: appears only once Moh adds a URL named task_advance (POST) #}
+    {% url 'task_advance' task.pk as advance_url %}
+    {% if advance_url and task.status != 'done' %}
+    <form method="post" action="{{ advance_url }}">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-primary-app">
+        {% if task.status == 'todo' %}Start task{% else %}Mark as done{% endif %}
+      </button>
+    </form>
+    {% endif %}
+    <a class="btn btn-ghost" href="{% url 'task_update' task.pk %}">Edit</a>
+  </div>
+</div>
+
+<div class="card-app mb-4">
+  <h2 class="section-title">Description</h2>
+  {% if task.description %}{{ task.description|linebreaks }}{% else %}<p class="muted mb-0">No description.</p>{% endif %}
+</div>
+
+<h2 class="section-title"><i class="bi bi-chat-dots"></i> Comments</h2>
+<div class="card-app">
+  {% for comment in comments %}
+  <div class="comment">
+    <div class="comment-head">
+      <span><span class="comment-author">{{ comment.author.username }}</span>
+        <span class="comment-date">&middot; {{ comment.created_at|date:"M j, H:i" }}</span></span>
+      {% if comment.author == user %}
+        {# Optional: appears only once Moh adds a URL named comment_delete (POST) #}
+        {% url 'comment_delete' comment.pk as delete_url %}
+        {% if delete_url %}
+        <form method="post" action="{{ delete_url }}">
+          {% csrf_token %}
+          <button type="submit" class="btn-link-danger">Delete</button>
+        </form>
+        {% endif %}
+      {% endif %}
+    </div>
+    <p>{{ comment.body }}</p>
+  </div>
+  {% empty %}
+  <p class="muted mb-3">No comments yet. Start the conversation below.</p>
+  {% endfor %}
+
+  <form method="post" class="form-stack mt-3" novalidate>
+    {% csrf_token %}
+    {% include "includes/form_fields.html" with form=comment_form %}
+    <button type="submit" class="btn btn-primary-app">Add comment</button>
+  </form>
+</div>
+{% endblock %}
