@@ -4,8 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import redirect
 from .activity import log_action
-from .forms import ProjectForm, TaskForm
-from .models import ActivityLog, Project, Task
+from .forms import ProjectForm, TaskForm, CommentForm
+from .models import ActivityLog, Project, Task, Comment
 from django.views.decorators.http import require_POST
 from django.db.models import Q
 
@@ -147,3 +147,33 @@ def task_advance(request, pk):
         log_action(request.user, ActivityLog.Action.UPDATED, task)
         messages.success(request, f'Task moved to {task.get_status_display()}.')
     return redirect('project_detail', pk=task.project.pk)
+
+@login_required
+def task_detail(request, pk):
+    task = get_object_or_404(Task, pk=pk, project__owner=request.user)
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.task = task
+            comment.author = request.user
+            comment.save()
+            messages.success(request, 'Comment added.')
+            return redirect('task_detail', pk=task.pk)
+    else:
+        form = CommentForm()
+    return render(request, 'tracker/task_detail.html', {
+        'task': task,
+        'comments': task.comments.select_related('author'),
+        'comment_form': form,
+    })
+
+
+@login_required
+@require_POST
+def comment_delete(request, pk):
+    comment = get_object_or_404(Comment, pk=pk, author=request.user)
+    task_pk = comment.task.pk
+    comment.delete()
+    messages.success(request, 'Comment deleted.')
+    return redirect('task_detail', pk=task_pk)
