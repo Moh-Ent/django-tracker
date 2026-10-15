@@ -6,7 +6,7 @@ from django.shortcuts import redirect
 from .activity import log_action
 from .forms import ProjectForm, TaskForm
 from .models import ActivityLog, Project, Task
-
+from django.views.decorators.http import require_POST
 
 
 def home(request):
@@ -104,3 +104,21 @@ def task_delete(request, pk):
         messages.success(request, 'Task deleted.')
         return redirect('project_detail', pk=project_pk)
     return render(request, 'tracker/task_confirm_delete.html', {'task': task})
+
+NEXT_STATUS = {
+    Task.Status.TODO: Task.Status.DOING,
+    Task.Status.DOING: Task.Status.DONE,
+}
+
+
+@login_required
+@require_POST
+def task_advance(request, pk):
+    task = get_object_or_404(Task, pk=pk, project__owner=request.user)
+    new_status = NEXT_STATUS.get(task.status)
+    if new_status:
+        task.status = new_status
+        task.save(update_fields=['status'])
+        log_action(request.user, ActivityLog.Action.UPDATED, task)
+        messages.success(request, f'Task moved to {task.get_status_display()}.')
+    return redirect('project_detail', pk=task.project.pk)
