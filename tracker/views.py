@@ -7,6 +7,7 @@ from .activity import log_action
 from .forms import ProjectForm, TaskForm
 from .models import ActivityLog, Project, Task
 from django.views.decorators.http import require_POST
+from django.db.models import Q
 
 
 def home(request):
@@ -21,7 +22,32 @@ def project_list(request):
 @login_required
 def project_detail(request, pk):
     project = get_object_or_404(Project, pk=pk, owner=request.user)
-    return render(request, 'tracker/project_detail.html', {'project': project})
+    tasks = project.tasks.all()
+
+    status = request.GET.get('status', '')
+    priority = request.GET.get('priority', '')
+    query = request.GET.get('q', '').strip()
+
+    if status in Task.Status.values:
+        tasks = tasks.filter(status=status)
+    if priority in Task.Priority.values:
+        tasks = tasks.filter(priority=priority)
+    if query:
+        tasks = tasks.filter(
+            Q(title__icontains=query) | Q(description__icontains=query)
+        )
+
+    page_obj = Paginator(tasks, 10).get_page(request.GET.get('page'))
+
+    params = request.GET.copy()
+    params.pop('page', None)
+
+    return render(request, 'tracker/project_detail.html', {
+        'project': project,
+        'page_obj': page_obj,
+        'filters': {'status': status, 'priority': priority, 'q': query},
+        'querystring': params.urlencode(),
+    })
 
 @login_required
 def project_create(request):
@@ -109,7 +135,6 @@ NEXT_STATUS = {
     Task.Status.TODO: Task.Status.DOING,
     Task.Status.DOING: Task.Status.DONE,
 }
-
 
 @login_required
 @require_POST
