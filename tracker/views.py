@@ -38,3 +38,28 @@ def project_create(request):
     else:
         form = ProjectForm()
     return render(request, 'tracker/project_form.html', {'form': form})
+
+@login_required
+def project_update(request, pk):
+    project = get_object_or_404(Project, pk=pk, owner=request.user)
+    if request.method == 'POST':
+        form = ProjectForm(request.POST, instance=project)
+        if form.is_valid():
+            form.save()
+            log_action(request.user, ActivityLog.Action.UPDATED, project)
+            messages.success(request, 'Project updated.')
+            return redirect('project_detail', pk=project.pk)
+    else:
+        form = ProjectForm(instance=project)
+    return render(request, 'tracker/project_form.html', {'form': form})
+
+
+@login_required
+def project_delete(request, pk):
+    project = get_object_or_404(Project, pk=pk, owner=request.user)
+    if request.method == 'POST':
+        log_action(request.user, ActivityLog.Action.DELETED, project)
+        project.delete()
+        messages.success(request, 'Project deleted.')
+        return redirect('project_list')
+    return render(request, 'tracker/project_confirm_delete.html', {'project': project})
