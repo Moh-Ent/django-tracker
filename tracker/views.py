@@ -78,3 +78,29 @@ def task_create(request, project_pk):
     else:
         form = TaskForm()
     return render(request, 'tracker/task_form.html', {'form': form, 'project': project})
+
+@login_required
+def task_update(request, pk):
+    task = get_object_or_404(Task, pk=pk, project__owner=request.user)
+    if request.method == 'POST':
+        form = TaskForm(request.POST, instance=task)
+        if form.is_valid():
+            form.save()
+            log_action(request.user, ActivityLog.Action.UPDATED, task)
+            messages.success(request, 'Task updated.')
+            return redirect('project_detail', pk=task.project.pk)
+    else:
+        form = TaskForm(instance=task)
+    return render(request, 'tracker/task_form.html', {'form': form, 'project': task.project})
+
+
+@login_required
+def task_delete(request, pk):
+    task = get_object_or_404(Task, pk=pk, project__owner=request.user)
+    project_pk = task.project.pk
+    if request.method == 'POST':
+        log_action(request.user, ActivityLog.Action.DELETED, task)
+        task.delete()
+        messages.success(request, 'Task deleted.')
+        return redirect('project_detail', pk=project_pk)
+    return render(request, 'tracker/task_confirm_delete.html', {'task': task})
