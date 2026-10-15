@@ -1,0 +1,15 @@
+{# Params: task. Optional: overdue (True), show_project (True) #}
+<a class="task-row" href="{% url 'task_detail' task.pk %}">
+  <span>
+    <span class="task-title">{{ task.title }}</span>
+    <span class="task-meta">
+      {% if show_project %}<i class="bi bi-folder2"></i> {{ task.project.name }} &middot; {% endif %}
+      {% if task.due_date %}<i class="bi bi-calendar-event"></i> {{ task.due_date|date:"M j" }}{% else %}No due date{% endif %}
+    </span>
+  </span>
+  <span class="task-pills">
+    {% if overdue %}<span class="pill pill-overdue">Overdue</span>{% endif %}
+    <span class="pill pill-{{ task.priority }}">{{ task.get_priority_display }}</span>
+    <span class="pill pill-{{ task.status }}">{{ task.get_status_display }}</span>
+  </span>
+</a>

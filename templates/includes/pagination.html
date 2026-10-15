@@ -1,0 +1,19 @@
+{# Needs page_obj. Keeps current filters through {% page_url %}. #}
+{% load ui %}
+{% if page_obj.has_other_pages %}
+<nav class="pager" aria-label="Pagination">
+  {% if page_obj.has_previous %}
+  <a class="pager-btn" href="{% page_url page_obj.previous_page_number %}" aria-label="Previous page"><i class="bi bi-chevron-left"></i></a>
+  {% endif %}
+  {% for n in page_obj.paginator.page_range %}
+    {% if n == page_obj.number %}
+      <span class="pager-btn is-current" aria-current="page">{{ n }}</span>
+    {% else %}
+      <a class="pager-btn" href="{% page_url n %}">{{ n }}</a>
+    {% endif %}
+  {% endfor %}
+  {% if page_obj.has_next %}
+  <a class="pager-btn" href="{% page_url page_obj.next_page_number %}" aria-label="Next page"><i class="bi bi-chevron-right"></i></a>
+  {% endif %}
+</nav>
+{% endif %}

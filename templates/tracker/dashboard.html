@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Hi, {{ user.username }}</h1>
+    <p class="muted mb-0">Here is where your semester stands.</p>
+  </div>
+  <a class="btn btn-ghost" href="{% url 'project_list' %}">View projects</a>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="card-app stat-card stat-todo">
+      <span class="stat-icon"><i class="bi bi-circle"></i></span>
+      <div><div class="stat-num">{{ status_counts.todo }}</div><div class="stat-label">To do</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card-app stat-card stat-doing">
+      <span class="stat-icon"><i class="bi bi-hourglass-split"></i></span>
+      <div><div class="stat-num">{{ status_counts.doing }}</div><div class="stat-label">Doing</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card-app stat-card stat-done">
+      <span class="stat-icon"><i class="bi bi-check-lg"></i></span>
+      <div><div class="stat-num">{{ status_counts.done }}</div><div class="stat-label">Done</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card-app stat-card stat-overdue">
+      <span class="stat-icon"><i class="bi bi-exclamation-lg"></i></span>
+      <div><div class="stat-num">{{ overdue_tasks|length }}</div><div class="stat-label">Overdue</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-6">
+    <h2 class="section-title"><i class="bi bi-exclamation-triangle text-overdue"></i> Overdue</h2>
+    {% if overdue_tasks %}
+    <div class="task-list">
+      {% for task in overdue_tasks %}
+        {% include "includes/task_row.html" with task=task overdue=True show_project=True %}
+      {% endfor %}
+    </div>
+    {% else %}
+      {% include "includes/empty_state.html" with icon="bi-emoji-sunglasses" title="Nothing overdue" text="You are on top of things. Nice." %}
+    {% endif %}
+  </div>
+
+  <div class="col-lg-6">
+    <h2 class="section-title"><i class="bi bi-calendar-week text-primary-app"></i> Due this week</h2>
+    {% if due_this_week %}
+    <div class="task-list">
+      {% for task in due_this_week %}
+        {% include "includes/task_row.html" with task=task show_project=True %}
+      {% endfor %}
+    </div>
+    {% else %}
+      {% include "includes/empty_state.html" with icon="bi-calendar-check" title="Nothing due this week" text="A quiet week. A good time to plan ahead." %}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

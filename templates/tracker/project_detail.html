@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}{{ project.name }}{% endblock %}
+
+{% block content %}
+<a class="back-link" href="{% url 'project_list' %}"><i class="bi bi-arrow-left"></i> All projects</a>
+
+<div class="page-head">
+  <div>
+    <h1>{{ project.name }}</h1>
+    {% if project.description %}<p class="muted mb-0">{{ project.description }}</p>{% endif %}
+  </div>
+  <div class="actions">
+    <a class="btn btn-primary-app" href="{% url 'task_create' project.pk %}"><i class="bi bi-plus-lg"></i> Add task</a>
+    <a class="btn btn-ghost" href="{% url 'project_update' project.pk %}">Edit</a>
+    <a class="btn btn-ghost" href="{% url 'project_delete' project.pk %}">Delete</a>
+  </div>
+</div>
+
+{% if project.done_count is not None %}
+<div class="card-app mb-3">
+  <div class="d-flex justify-content-between mb-2">
+    <strong>Progress</strong>
+    <span class="muted">{{ project.done_count }} of {{ project.tasks.count }} done</span>
+  </div>
+  <div class="progress-app">
+    <span style="width: {% widthratio project.done_count project.tasks.count 100 %}%"></span>
+  </div>
+</div>
+{% endif %}
+
+<form method="get" class="filter-bar" role="search">
+  <input type="search" name="q" value="{{ filters.q }}" class="form-control search" placeholder="Search tasks...">
+  <select name="status" class="form-select" aria-label="Filter by status">
+    <option value="">All statuses</option>
+    <option value="todo" {% if filters.status == "todo" %}selected{% endif %}>To do</option>
+    <option value="doing" {% if filters.status == "doing" %}selected{% endif %}>Doing</option>
+    <option value="done" {% if filters.status == "done" %}selected{% endif %}>Done</option>
+  </select>
+  <select name="priority" class="form-select" aria-label="Filter by priority">
+    <option value="">All priorities</option>
+    <option value="low" {% if filters.priority == "low" %}selected{% endif %}>Low</option>
+    <option value="medium" {% if filters.priority == "medium" %}selected{% endif %}>Medium</option>
+    <option value="high" {% if filters.priority == "high" %}selected{% endif %}>High</option>
+  </select>
+  <button class="btn btn-primary-app" type="submit">Filter</button>
+  {% if filters.status or filters.priority or filters.q %}
+    <a class="btn btn-ghost" href="{{ request.path }}">Clear</a>
+  {% endif %}
+</form>
+
+{% if page_obj.object_list %}
+<div class="task-list">
+  {% for task in page_obj %}
+    {% include "includes/task_row.html" with task=task %}
+  {% endfor %}
+</div>
+{% include "includes/pagination.html" %}
+
+{% elif filters.status or filters.priority or filters.q %}
+  {% include "includes/empty_state.html" with icon="bi-search" title="No tasks match your filters" text="Try a different search, or clear the filters." button_url=request.path button_label="Clear filters" %}
+{% else %}
+  {% url 'task_create' project.pk as add_url %}
+  {% include "includes/empty_state.html" with icon="bi-list-check" title="No tasks yet" text="Add your first task to get this project moving." button_url=add_url button_label="Add a task" %}
+{% endif %}
+{% endblock %}
+
+{% block fab %}
+<a class="fab" href="{% url 'task_create' project.pk %}" aria-label="Add task"><i class="bi bi-plus-lg"></i></a>
+{% endblock %}

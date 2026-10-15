@@ -1,0 +1,7 @@
+{# Params: icon, title, text. Optional: button_url, button_label #}
+<div class="card-app empty-state">
+  <i class="bi {{ icon|default:'bi-inbox' }}"></i>
+  <h2 class="h5 mt-2">{{ title }}</h2>
+  <p>{{ text }}</p>
+  {% if button_url %}<a class="btn btn-primary-app" href="{{ button_url }}">{{ button_label }}</a>{% endif %}
+</div>

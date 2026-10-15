@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}{% if form.instance.pk %}Edit task{% else %}New task{% endif %}{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="card-app auth-card">
+    <h1>{% if form.instance.pk %}Edit task{% else %}New task{% endif %}</h1>
+    <p class="auth-sub">In project <strong>{{ project.name }}</strong></p>
+
+    <form method="post" class="form-stack" novalidate>
+      {% csrf_token %}
+      {% include "includes/form_fields.html" %}
+      <div class="actions">
+        <button type="submit" class="btn btn-primary-app">Save task</button>
+        <a class="btn btn-ghost" href="{% url 'project_detail' project.pk %}">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
