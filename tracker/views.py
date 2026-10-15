@@ -1,8 +1,13 @@
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.shortcuts import redirect
+from .activity import log_action
+from .forms import ProjectForm
+from .models import ActivityLog, Project
 
-from .models import Project
+
 
 
 def home(request):
@@ -18,3 +23,18 @@ def project_list(request):
 def project_detail(request, pk):
     project = get_object_or_404(Project, pk=pk, owner=request.user)
     return render(request, 'tracker/project_detail.html', {'project': project})
+
+@login_required
+def project_create(request):
+    if request.method == 'POST':
+        form = ProjectForm(request.POST)
+        if form.is_valid():
+            project = form.save(commit=False)
+            project.owner = request.user
+            project.save()
+            log_action(request.user, ActivityLog.Action.CREATED, project)
+            messages.success(request, 'Project created.')
+            return redirect('project_detail', pk=project.pk)
+    else:
+        form = ProjectForm()
+    return render(request, 'tracker/project_form.html', {'form': form})
