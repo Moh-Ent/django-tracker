@@ -1,7 +1,7 @@
 from django import forms
 from django.utils import timezone
 
-from .models import Project, Task
+from .models import Project, Task, Comment
 
 
 class ProjectForm(forms.ModelForm):
@@ -23,3 +23,8 @@ class TaskForm(forms.ModelForm):
         if due and not self.instance.pk and due < timezone.localdate():
             raise forms.ValidationError("Due date can't be in the past.")
         return due
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['body']
