@@ -1,15 +1,16 @@
 from datetime import timedelta
+
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.decorators.http import require_POST
-from django.contrib.auth import get_user_model
-from django.shortcuts import render
 from django.utils import timezone
+from django.utils.dateparse import parse_date
+from django.views.decorators.http import require_POST
 
-from tracker.models import Project, Task, ActivityLog
+from tracker.models import ActivityLog, Project, Task
 
 from .decorators import staff_required
 
@@ -77,30 +78,59 @@ def toggle_user_active(request, user_id):
     )
     return redirect('manage_users')
 
+
 @staff_required
 def activity_list(request):
     action = request.GET.get('action', '').strip()
     query = request.GET.get('q', '').strip()
-
-    logs = ActivityLog.objects.select_related('user').all()
+    user_id = request.GET.get('user', '').strip()
+    date_from = request.GET.get('date_from', '').strip()
+    date_to = request.GET.get('date_to', '').strip()
 
     valid_actions = ActivityLog.Action.values
+
+    # Validate the optional filters.
+    if user_id and not user_id.isdigit():
+        return HttpResponseBadRequest('Invalid user filter.')
+
+    from_date = parse_date(date_from) if date_from else None
+    to_date = parse_date(date_to) if date_to else None
+
+    if date_from and from_date is None:
+        return HttpResponseBadRequest('Invalid start date.')
+    if date_to and to_date is None:
+        return HttpResponseBadRequest('Invalid end date.')
+    if from_date and to_date and from_date > to_date:
+        return HttpResponseBadRequest(
+            'Start date must be on or before end date.'
+        )
+    logs = ActivityLog.objects.select_related('user').all()
+
     if action in valid_actions:
         logs = logs.filter(action=action)
+
+    if user_id:
+        logs = logs.filter(user_id=user_id)
+
+    if from_date:
+        logs = logs.filter(created_at__date__gte=from_date)
+
+    if to_date:
+        logs = logs.filter(created_at__date__lte=to_date)
 
     if query:
         search_filter = (
             Q(user__username__icontains=query)
             | Q(target_type__icontains=query)
         )
-
         if query.isdigit():
             search_filter |= Q(target_id=int(query))
-
         logs = logs.filter(search_filter)
 
     paginator = Paginator(logs, 25)
     page_obj = paginator.get_page(request.GET.get('page'))
+
+    users = User.objects.order_by('username')
 
     return render(request, 'manage_panel/activity.html', {
         'logs': page_obj.object_list,
@@ -108,4 +138,15 @@ def activity_list(request):
         'selected_action': action if action in valid_actions else '',
         'search_query': query,
         'action_choices': ActivityLog.Action.choices,
+        'users': users,
+        'selected_user': user_id,
+        'date_from': date_from,
+        'date_to': date_to,
+        'filters': {
+            'action': action,
+            'user': user_id,
+            'date_from': date_from,
+            'date_to': date_to,
+            'q': query,
+        },
     })
