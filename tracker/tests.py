@@ -128,6 +128,40 @@ class TaskFormTests(TestCase):
         form = TaskForm(data=self.data(title=''))
         self.assertFalse(form.is_valid())
 
+class DashboardTests(BaseTestCase):
+    def test_dashboard_requires_login(self):
+        url = reverse('dashboard')
+        response = self.client.get(url)
+        self.assertRedirects(
+            response, f"{reverse('login')}?next={url}", fetch_redirect_response=False
+        )
+
+    def test_counts_and_lists_only_own_tasks(self):
+        today = timezone.localdate()
+        Task.objects.create(
+            project=self.project, title='Late', due_date=today - timedelta(days=2)
+        )
+        Task.objects.create(
+            project=self.project, title='Late but done',
+            due_date=today - timedelta(days=2), status=Task.Status.DONE,
+        )
+        Task.objects.create(
+            project=self.project, title='Soon', due_date=today + timedelta(days=3)
+        )
+        bob_project = Project.objects.create(owner=self.bob, name='Bob project')
+        Task.objects.create(
+            project=bob_project, title='Bob late', due_date=today - timedelta(days=5)
+        )
+
+        self.client.login(username='alice', password='alice-pass-123')
+        response = self.client.get(reverse('dashboard'))
+
+        self.assertEqual([t.title for t in response.context['overdue_tasks']], ['Late'])
+        self.assertEqual([t.title for t in response.context['due_this_week']], ['Soon'])
+        self.assertEqual(
+            response.context['status_counts'], {'todo': 3, 'doing': 0, 'done': 1}
+        )
+
 class ProjectSearchTests(BaseTestCase):
     def test_search_only_returns_own_projects(self):
         Project.objects.create(owner=self.bob, name='Alice-themed project')
