@@ -2,7 +2,7 @@
 
 A small Trello-style task tracker built with Django. Each user keeps private projects and tasks, with comments, search and filters. Staff get a separate `/manage/` panel with site statistics, user management and an audit log of every change.
 
-**Live demo:** https://YOUR-APP.onrender.com
+**Live demo:** (https://django-tracker-xxmr.onrender.com/)
 (Free hosting: the first visit after a quiet period can take up to a minute to wake up.)
 
 
@@ -11,8 +11,8 @@ A small Trello-style task tracker built with Django. Each user keeps private pro
 
 | Account | Role | Password |
 |---|---|---|
-| `demo` | Normal user with sample projects and tasks | `YOUR-DEMO-PASSWORD` |
-| `staffdemo` | Staff, can open `/manage/` | `YOUR-DEMO-PASSWORD` |
+| `demo` | Normal user with sample projects and tasks | `demo` |
+| `staffdemo` | Staff, can open `/manage/` | `demo` |
 
 The demo data is reloaded on every deploy, and accounts created by visitors are not kept.
 
