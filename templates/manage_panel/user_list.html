@@ -12,6 +12,12 @@
 
 {% include "manage_panel/_subnav.html" with active="users" %}
 
+<form method="get" class="filter-bar" role="search">
+  <input type="search" name="q" value="{{ search_query }}" class="form-control search" placeholder="Search username or email...">
+  <button class="btn btn-primary-app" type="submit">Search</button>
+  {% if search_query %}<a class="btn btn-ghost" href="{{ request.path }}">Clear</a>{% endif %}
+</form>
+
 {% if page_obj.object_list %}
 <div class="table-wrap">
   <table class="table-app">
@@ -52,6 +58,7 @@
             {% if toggle_url %}
             <form method="post" action="{{ toggle_url }}">
               {% csrf_token %}
+              <input type="hidden" name="action" value="{% if member.is_active %}deactivate{% else %}activate{% endif %}">
               <button type="submit" class="btn btn-sm {% if member.is_active %}btn-ghost{% else %}btn-primary-app{% endif %}">
                 {% if member.is_active %}Deactivate{% else %}Activate{% endif %}
               </button>
@@ -65,6 +72,8 @@
   </table>
 </div>
 {% include "includes/pagination.html" %}
+{% elif search_query %}
+  {% include "includes/empty_state.html" with icon="bi-search" title="No users match" text="Try another name or email, or clear the search." button_url=request.path button_label="Clear search" %}
 {% else %}
   {% include "includes/empty_state.html" with icon="bi-people" title="No users yet" text="Accounts will appear here as people sign up." %}
 {% endif %}

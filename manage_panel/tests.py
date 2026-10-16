@@ -81,7 +81,7 @@ class StaffUserManagementTests(TestCase):
         )
         self.assertTrue(logged_in)
 
-        response = self.client.get(reverse('manage_activity'))
+        response = self.client.get(reverse('manage_log'))
         self.assertEqual(response.status_code, 404)
 
     def test_user_list_includes_project_counts(self):
@@ -196,7 +196,7 @@ class StaffActivityLogTests(TestCase):
 
     def test_anonymous_user_is_redirected(self):
         self.client.logout()
-        url = reverse('manage_activity')
+        url = reverse('manage_log')
         response = self.client.get(url)
 
         self.assertRedirects(
@@ -209,18 +209,18 @@ class StaffActivityLogTests(TestCase):
         self.client.logout()
         self.client.login(username='member', password='member-pass-123')
 
-        response = self.client.get(reverse('manage_activity'))
+        response = self.client.get(reverse('manage_log'))
 
         self.assertEqual(response.status_code, 404)
 
     def test_staff_can_view_activity_logs(self):
-        response = self.client.get(reverse('manage_activity'))
+        response = self.client.get(reverse('manage_log'))
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context['logs']), 3)
 
     def test_logs_are_ordered_newest_first(self):
-        response = self.client.get(reverse('manage_activity'))
+        response = self.client.get(reverse('manage_log'))
 
         log_ids = [log.pk for log in response.context['logs']]
         self.assertEqual(
@@ -234,7 +234,7 @@ class StaffActivityLogTests(TestCase):
 
     def test_filter_by_action(self):
         response = self.client.get(
-            reverse('manage_activity'),
+            reverse('manage_log'),
             {'action': ActivityLog.Action.UPDATED},
         )
 
@@ -245,7 +245,7 @@ class StaffActivityLogTests(TestCase):
 
     def test_search_by_username(self):
         response = self.client.get(
-            reverse('manage_activity'), {'q': 'member'}
+            reverse('manage_log'), {'q': 'member'}
         )
 
         self.assertEqual(
@@ -255,7 +255,7 @@ class StaffActivityLogTests(TestCase):
 
     def test_search_by_target_type(self):
         response = self.client.get(
-            reverse('manage_activity'), {'q': 'project'}
+            reverse('manage_log'), {'q': 'project'}
         )
 
         self.assertEqual(
@@ -265,7 +265,7 @@ class StaffActivityLogTests(TestCase):
 
     def test_search_by_target_id(self):
         response = self.client.get(
-            reverse('manage_activity'), {'q': '303'}
+            reverse('manage_log'), {'q': '303'}
         )
 
         self.assertEqual(
@@ -275,7 +275,7 @@ class StaffActivityLogTests(TestCase):
 
     def test_empty_search_results(self):
         response = self.client.get(
-            reverse('manage_activity'), {'q': 'no-such-user-or-object'}
+            reverse('manage_log'), {'q': 'no-such-user-or-object'}
         )
 
         self.assertEqual(response.status_code, 200)
@@ -290,14 +290,14 @@ class StaffActivityLogTests(TestCase):
                 target_id=1000 + index,
             )
 
-        response = self.client.get(reverse('manage_activity'))
+        response = self.client.get(reverse('manage_log'))
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['page_obj'].paginator.num_pages, 2)
         self.assertEqual(len(response.context['logs']), 25)
 
         response = self.client.get(
-            reverse('manage_activity'), {'page': '2'}
+            reverse('manage_log'), {'page': '2'}
         )
         self.assertEqual(len(response.context['logs']), 3)
 
@@ -337,7 +337,7 @@ class StaffActivityLogFilterTests(TestCase):
             username='filteradmin',
             password='admin-pass-123',
         )
-        self.url = reverse('manage_activity')
+        self.url = reverse('manage_log')
 
     def test_filter_by_user(self):
         response = self.client.get(

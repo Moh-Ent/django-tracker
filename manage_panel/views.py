@@ -48,7 +48,7 @@ def user_list(request):
     paginator = Paginator(users, 20)
     page_obj = paginator.get_page(request.GET.get('page'))
 
-    return render(request, 'manage_panel/users.html', {
+    return render(request, 'manage_panel/user_list.html', {
         'users': page_obj.object_list,
         'page_obj': page_obj,
         'search_query': search_query,
@@ -132,7 +132,7 @@ def activity_list(request):
 
     users = User.objects.order_by('username')
 
-    return render(request, 'manage_panel/activity.html', {
+    return render(request, 'manage_panel/activity_log.html', {
         'logs': page_obj.object_list,
         'page_obj': page_obj,
         'selected_action': action if action in valid_actions else '',
