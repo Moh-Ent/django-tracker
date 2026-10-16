@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Staff panel</h1>
+<ul>
+  <li>Users: {{ stats.total_users }}</li>
+  <li>Projects: {{ stats.total_projects }}</li>
+  <li>Tasks: {{ stats.total_tasks }}</li>
+  <li>Overdue: {{ stats.overdue_tasks }}</li>
+  <li>New signups this week: {{ stats.new_signups_week }}</li>
+</ul>
+{% endblock %}
