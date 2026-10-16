@@ -161,6 +161,7 @@ class DashboardTests(BaseTestCase):
         self.assertEqual(
             response.context['status_counts'], {'todo': 3, 'doing': 0, 'done': 1}
         )
+
 class ProjectSearchTests(BaseTestCase):
     def test_search_only_returns_own_projects(self):
         Project.objects.create(owner=self.bob, name='Alice-themed project')
