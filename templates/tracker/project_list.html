@@ -24,12 +24,12 @@
       <h2>{{ project.name }}</h2>
       <p class="desc">{{ project.description|truncatechars:90|default:"No description yet." }}</p>
       <div class="meta">
-        <span><i class="bi bi-list-check"></i> {{ project.tasks.count }} task{{ project.tasks.count|pluralize }}</span>
+        <span><i class="bi bi-list-check"></i> {{ project.task_count }} task{{ project.task_count|pluralize }}</span>
         <span>{{ project.created_at|date:"M j" }}</span>
       </div>
       {% if project.done_count is not None %}
       <div class="progress-app" aria-label="Progress">
-        <span style="width: {% widthratio project.done_count project.tasks.count 100 %}%"></span>
+        <span style="width: {% widthratio project.done_count project.task_count 100 %}%"></span>
       </div>
       {% endif %}
     </a>
