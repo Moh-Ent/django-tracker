@@ -33,14 +33,6 @@ The demo data is reloaded on every deploy, and accounts created by visitors are 
 - Activity log with filters for user, action, date range and keyword
 - The standard Django admin at `/admin/`, customised with inline tasks, filters, search and bulk actions
 
-## Screenshots
-
-| | |
-|---|---|
-| ![Projects](docs/screenshots/04-projects.png) | ![Project detail](docs/screenshots/05-project-detail.png) |
-| ![Task detail](docs/screenshots/06-task-detail.png) | ![Staff overview](docs/screenshots/07-staff-overview.png) |
-| ![Staff users](docs/screenshots/08-staff-users.png) | ![Activity log](docs/screenshots/09-staff-activity.png) |
-
 ## Security decisions
 
 - **Ownership filtering.** Every project and task lookup is filtered by the logged-in user (`owner=request.user`, or `project__owner` for tasks). Another user's URL returns a 404, so you can't tell whether it exists. This prevents IDOR (insecure direct object reference) attacks.
