@@ -212,3 +212,46 @@ a.pager-btn:hover { border-color: var(--primary); color: var(--primary); }
 .comment p { margin: 0; white-space: pre-wrap; }
 .btn-link-danger { background: none; border: 0; padding: 0; color: var(--s-overdue); font-size: .85rem; }
 .btn-link-danger:hover { text-decoration: underline; }
+
+/* ================= Day 3: staff panel ================= */
+.staff-badge { display: inline-flex; align-items: center; gap: .35rem; background: var(--ink); color: var(--bg); font-size: .72rem; font-weight: 700;
+  letter-spacing: .05em; text-transform: uppercase; padding: .2rem .65rem; border-radius: 999px; margin-bottom: .6rem; }
+.staff-tabs { display: flex; gap: .25rem; border-bottom: 1px solid var(--line); margin-bottom: 1.5rem; overflow-x: auto; }
+.staff-tabs a { padding: .6rem 1rem; color: var(--muted); text-decoration: none; font-weight: 500; white-space: nowrap;
+  border-bottom: 3px solid transparent; margin-bottom: -1px; }
+.staff-tabs a:hover { color: var(--ink); }
+.staff-tabs a.is-active { color: var(--primary); border-bottom-color: var(--primary); }
+
+.table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+.table-app { width: 100%; border-collapse: collapse; font-size: .92rem; }
+.table-app th { text-align: left; padding: .7rem 1rem; color: var(--muted); font-size: .75rem; text-transform: uppercase; letter-spacing: .05em;
+  border-bottom: 1px solid var(--line); white-space: nowrap; }
+.table-app td { padding: .65rem 1rem; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.table-app tbody tr:last-child td { border-bottom: 0; }
+.table-app tbody tr:hover { background: var(--bg); }
+.user-cell { display: flex; align-items: center; gap: .65rem; }
+.user-cell .avatar { flex-shrink: 0; }
+.small-muted { color: var(--muted); font-size: .82rem; }
+
+.stat-users .stat-icon { background: var(--primary); color: var(--primary-ink); }
+.stat-projects .stat-icon { background: var(--p-low); }
+.stat-tasks .stat-icon { background: var(--s-todo); }
+.stat-signups .stat-icon { background: var(--s-done); }
+
+.pill-created, .pill-active { background: var(--s-done); }
+.pill-updated { background: var(--s-doing); color: #1b1640; }
+.pill-deleted { background: var(--s-overdue); }
+.pill-inactive { background: var(--s-todo); }
+.pill-staff { background: var(--primary); color: var(--primary-ink); margin-left: .35rem; }
+
+.link-card { display: flex; align-items: center; gap: 1rem; }
+.link-card > .bi { font-size: 1.8rem; color: var(--primary); }
+
+/* ================= Day 3: landing page ================= */
+.hero { padding: 2.5rem 0 1.5rem; max-width: 720px; animation: rise .5s ease both; }
+.hero-tag { display: inline-block; background: var(--accent); color: #1b1640; font-weight: 700; font-size: .8rem; padding: .2rem .75rem; border-radius: 999px; margin-bottom: 1rem; }
+.hero h1 { font-size: clamp(2.2rem, 6vw, 3.6rem); line-height: 1.05; font-weight: 800; margin-bottom: 1rem; }
+.hero-sub { font-size: 1.15rem; color: var(--muted); margin-bottom: 1.5rem; }
+.feature > .bi { font-size: 1.6rem; color: var(--primary); }
+.feature h2 { font-size: 1.15rem; margin: .5rem 0 .25rem; }
+@keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }

@@ -1,0 +1,6 @@
+{# Param: active = overview | users | log #}
+<nav class="staff-tabs" aria-label="Staff sections">
+  <a class="{% if active == 'overview' %}is-active{% endif %}" href="{% url 'manage_dashboard' %}">Overview</a>
+  <a class="{% if active == 'users' %}is-active{% endif %}" href="{% url 'manage_users' %}">Users</a>
+  <a class="{% if active == 'log' %}is-active{% endif %}" href="{% url 'manage_log' %}">Activity log</a>
+</nav>

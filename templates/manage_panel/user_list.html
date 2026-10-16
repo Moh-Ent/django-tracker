@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Staff: users{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <span class="staff-badge"><i class="bi bi-shield-lock"></i> Staff only</span>
+    <h1>Users</h1>
+    <p class="muted mb-0">Deactivated users cannot log in. Their data stays.</p>
+  </div>
+</div>
+
+{% include "manage_panel/_subnav.html" with active="users" %}
+
+{% if page_obj.object_list %}
+<div class="table-wrap">
+  <table class="table-app">
+    <thead>
+      <tr>
+        <th>User</th>
+        <th>Projects</th>
+        <th>Joined</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for member in page_obj %}
+      <tr>
+        <td>
+          <div class="user-cell">
+            <span class="avatar">{{ member.username|slice:":1"|upper }}</span>
+            <div>
+              <strong>{{ member.username }}</strong>
+              {% if member.is_staff %}<span class="pill pill-staff">Staff</span>{% endif %}
+              {% if member.email %}<div class="small-muted">{{ member.email }}</div>{% endif %}
+            </div>
+          </div>
+        </td>
+        <td>{{ member.project_count }}</td>
+        <td>{{ member.date_joined|date:"M j, Y" }}</td>
+        <td>
+          {% if member.is_active %}<span class="pill pill-active">Active</span>
+          {% else %}<span class="pill pill-inactive">Inactive</span>{% endif %}
+        </td>
+        <td class="text-end">
+          {% if member.pk == user.pk %}
+            <span class="small-muted">That is you</span>
+          {% else %}
+            {# URL name to confirm with Moh: manage_user_toggle (takes the user's pk, POST) #}
+            {% url 'manage_user_toggle' member.pk as toggle_url %}
+            {% if toggle_url %}
+            <form method="post" action="{{ toggle_url }}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm {% if member.is_active %}btn-ghost{% else %}btn-primary-app{% endif %}">
+                {% if member.is_active %}Deactivate{% else %}Activate{% endif %}
+              </button>
+            </form>
+            {% endif %}
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "includes/pagination.html" %}
+{% else %}
+  {% include "includes/empty_state.html" with icon="bi-people" title="No users yet" text="Accounts will appear here as people sign up." %}
+{% endif %}
+{% endblock %}

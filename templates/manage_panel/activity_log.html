@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Staff: activity log{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <span class="staff-badge"><i class="bi bi-shield-lock"></i> Staff only</span>
+    <h1>Activity log</h1>
+    <p class="muted mb-0">Every create, edit and delete on projects and tasks.</p>
+  </div>
+</div>
+
+{% include "manage_panel/_subnav.html" with active="log" %}
+
+<form method="get" class="filter-bar" role="search">
+  <input type="search" name="user" value="{{ filters.user }}" class="form-control search" placeholder="Username...">
+  <select name="action" class="form-select" aria-label="Filter by action">
+    <option value="">All actions</option>
+    <option value="created" {% if filters.action == "created" %}selected{% endif %}>Created</option>
+    <option value="updated" {% if filters.action == "updated" %}selected{% endif %}>Updated</option>
+    <option value="deleted" {% if filters.action == "deleted" %}selected{% endif %}>Deleted</option>
+  </select>
+  <input type="date" name="date" value="{{ filters.date }}" class="form-control" style="flex: 0 1 170px; width: auto;" aria-label="Filter by date">
+  <button class="btn btn-primary-app" type="submit">Filter</button>
+  {% if filters.user or filters.action or filters.date %}
+    <a class="btn btn-ghost" href="{{ request.path }}">Clear</a>
+  {% endif %}
+</form>
+
+{% if page_obj.object_list %}
+<div class="table-wrap">
+  <table class="table-app">
+    <thead>
+      <tr>
+        <th>When</th>
+        <th>User</th>
+        <th>Action</th>
+        <th>What</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for log in page_obj %}
+      <tr>
+        <td class="text-nowrap">{{ log.created_at|date:"M j, H:i" }}</td>
+        <td>{% if log.user %}{{ log.user.username }}{% else %}<span class="small-muted">deleted user</span>{% endif %}</td>
+        <td><span class="pill pill-{{ log.action }}">{{ log.get_action_display }}</span></td>
+        <td>{{ log.target_type|title }} #{{ log.target_id }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "includes/pagination.html" %}
+
+{% elif filters.user or filters.action or filters.date %}
+  {% include "includes/empty_state.html" with icon="bi-search" title="No activity matches" text="Try different filters, or clear them." button_url=request.path button_label="Clear filters" %}
+{% else %}
+  {% include "includes/empty_state.html" with icon="bi-clock-history" title="No activity yet" text="Actions will show up here as people use the app." %}
+{% endif %}
+{% endblock %}
