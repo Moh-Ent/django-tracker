@@ -5,7 +5,7 @@ A small Trello-style task tracker built with Django. Each user keeps private pro
 **Live demo:** https://YOUR-APP.onrender.com
 (Free hosting: the first visit after a quiet period can take up to a minute to wake up.)
 
-![Dashboard](docs/screenshots/03-dashboard.png)
+
 
 ## Demo accounts
 
