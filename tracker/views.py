@@ -14,9 +14,6 @@ from .utils import count_by_status, days_until_due, is_overdue
 def home(request):
     return render(request, 'home.html')
 
-def home(request):
-    return render(request, 'home.html')
-
 
 @login_required
 def project_list(request):
