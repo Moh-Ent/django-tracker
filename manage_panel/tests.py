@@ -300,3 +300,100 @@ class StaffActivityLogTests(TestCase):
             reverse('manage_activity'), {'page': '2'}
         )
         self.assertEqual(len(response.context['logs']), 3)
+
+
+class StaffActivityLogFilterTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.staff = User.objects.create_user(
+            'filteradmin',
+            password='admin-pass-123',
+            is_staff=True,
+        )
+        cls.member = User.objects.create_user(
+            'filtermember',
+            password='member-pass-123',
+        )
+
+        now = timezone.now()
+        cls.old_log = ActivityLog.objects.create(
+            user=cls.member,
+            action=ActivityLog.Action.CREATED,
+            target_type='task',
+            target_id=101,
+        )
+        cls.old_log.created_at = now - timedelta(days=2)
+        cls.old_log.save(update_fields=['created_at'])
+
+        cls.recent_log = ActivityLog.objects.create(
+            user=cls.staff,
+            action=ActivityLog.Action.UPDATED,
+            target_type='project',
+            target_id=202,
+        )
+
+    def setUp(self):
+        self.client.login(
+            username='filteradmin',
+            password='admin-pass-123',
+        )
+        self.url = reverse('manage_activity')
+
+    def test_filter_by_user(self):
+        response = self.client.get(
+            self.url,
+            {'user': str(self.member.pk)},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            list(response.context['logs']),
+            [self.old_log],
+        )
+
+    def test_filter_by_date_range(self):
+        today = timezone.localdate()
+        response = self.client.get(self.url, {
+            'date_from': today.isoformat(),
+            'date_to': today.isoformat(),
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            list(response.context['logs']),
+            [self.recent_log],
+        )
+
+    def test_invalid_date_returns_400(self):
+        response = self.client.get(
+            self.url,
+            {'date_from': 'not-a-date'},
+        )
+
+        self.assertEqual(response.status_code, 400)
+
+    def test_reversed_date_range_returns_400(self):
+        today = timezone.localdate()
+        yesterday = today - timedelta(days=1)
+
+        response = self.client.get(self.url, {
+            'date_from': today.isoformat(),
+            'date_to': yesterday.isoformat(),
+        })
+
+        self.assertEqual(response.status_code, 400)
+
+    def test_filters_can_be_combined(self):
+        today = timezone.localdate()
+        response = self.client.get(self.url, {
+            'user': str(self.staff.pk),
+            'action': ActivityLog.Action.UPDATED,
+            'date_from': today.isoformat(),
+            'date_to': today.isoformat(),
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            list(response.context['logs']),
+            [self.recent_log],
+        )
