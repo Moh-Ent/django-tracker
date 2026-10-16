@@ -25,6 +25,7 @@
 }
 
 [data-theme="dark"] {
+  color-scheme: dark;
   --bg: #12102a;
   --surface: #1c1940;
   --ink: #f1efff;
@@ -104,6 +105,9 @@ a.card-app:hover { transform: translateY(-3px); }
 /* ---------- Forms ---------- */
 .form-control, .form-select { background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; }
 .form-control:focus, .form-select:focus { background: var(--surface); color: var(--ink); border-color: var(--primary); box-shadow: 0 0 0 .2rem rgba(91, 61, 245, .2); }
+.form-control::placeholder,
+.form-stack input::placeholder,
+.form-stack textarea::placeholder { color: var(--muted); opacity: 1; }
 
 /* Wrap a Django form in .form-stack and its raw inputs get styled too,
    because the views' forms don't add Bootstrap classes themselves. */
@@ -193,6 +197,9 @@ a.card-app:hover { transform: translateY(-3px); }
 .project-card h2 { font-size: 1.2rem; margin-bottom: .4rem; }
 .project-card .desc { color: var(--muted); min-height: 2.6em; margin-bottom: .5rem; }
 .project-card .meta { display: flex; justify-content: space-between; color: var(--muted); font-size: .85rem; margin-bottom: .5rem; }
+.date-field { display: flex; align-items: center; gap: .5rem; margin: 0; flex: 0 1 auto; }
+.date-field span { color: var(--muted); font-weight: 500; font-size: .9rem; white-space: nowrap; }
+.date-field .form-control { width: auto; }
 
 /* Filter bar and pagination */
 .filter-bar { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; margin-bottom: 1.25rem; }
