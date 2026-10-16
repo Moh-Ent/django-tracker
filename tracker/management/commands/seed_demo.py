@@ -22,7 +22,7 @@ from tracker.activity import log_action
 from tracker.models import ActivityLog, Comment, Project, Task
 from tracker.utils import SEED_DATA
 
-DEFAULT_PASSWORD = 'demo-pass-123'
+DEFAULT_PASSWORD = 'demo'
 
 # A few comments so the task page is not empty. (title of task -> comments)
 DEMO_COMMENTS = {
