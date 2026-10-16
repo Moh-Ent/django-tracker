@@ -127,3 +127,11 @@ class TaskFormTests(TestCase):
     def test_empty_title_is_rejected(self):
         form = TaskForm(data=self.data(title=''))
         self.assertFalse(form.is_valid())
+
+class ProjectSearchTests(BaseTestCase):
+    def test_search_only_returns_own_projects(self):
+        Project.objects.create(owner=self.bob, name='Alice-themed project')
+        self.client.login(username='bob', password='bob-pass-123')
+        response = self.client.get(reverse('project_list'), {'q': 'Alice'})
+        names = [p.name for p in response.context['page_obj']]
+        self.assertEqual(names, ['Alice-themed project'])

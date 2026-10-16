@@ -1,23 +1,49 @@
-from django.core.paginator import Paginator
-from django.shortcuts import get_object_or_404, render
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.shortcuts import redirect
-from .activity import log_action
-from .forms import ProjectForm, TaskForm, CommentForm
-from .models import ActivityLog, Project, Task, Comment
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.db.models import Count, Q
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
-from django.db.models import Q
 
+from .activity import log_action
+from .forms import CommentForm, ProjectForm, TaskForm
+from .models import ActivityLog, Comment, Project, Task
 
 def home(request):
     return render(request, 'home.html')
 
 @login_required
 def project_list(request):
-    projects = Project.objects.filter(owner=request.user)
+    query = request.GET.get('q', '').strip()
+    projects = Project.objects.filter(owner=request.user).annotate(
+        task_count=Count('tasks'),
+        done_count=Count('tasks', filter=Q(tasks__status=Task.Status.DONE)),
+    )
+    if query:
+        projects = projects.filter(
+            Q(name__icontains=query) | Q(description__icontains=query)
+        )
     page_obj = Paginator(projects, 10).get_page(request.GET.get('page'))
-    return render(request, 'tracker/project_list.html', {'page_obj': page_obj})
+    return render(request, 'tracker/project_list.html', {
+        'page_obj': page_obj,
+        'query': query,
+    })
+@login_required
+def project_list(request):
+    query = request.GET.get('q', '').strip()
+    projects = Project.objects.filter(owner=request.user).annotate(
+        task_count=Count('tasks'),
+        done_count=Count('tasks', filter=Q(tasks__status=Task.Status.DONE)),
+    )
+    if query:
+        projects = projects.filter(
+            Q(name__icontains=query) | Q(description__icontains=query)
+        )
+    page_obj = Paginator(projects, 10).get_page(request.GET.get('page'))
+    return render(request, 'tracker/project_list.html', {
+        'page_obj': page_obj,
+        'query': query,
+    })
 
 @login_required
 def project_detail(request, pk):
