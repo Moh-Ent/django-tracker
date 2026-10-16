@@ -5,7 +5,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from tracker.models import Project, Task
+from tracker.models import Project, Task, ActivityLog
 
 User = get_user_model()
 
@@ -74,8 +74,14 @@ class StaffUserManagementTests(TestCase):
         )
 
     def test_non_staff_user_gets_404(self):
-        self.client.login(username='member', password='member-pass-123')
-        response = self.client.get(reverse('manage_users'))
+        self.client.logout()
+        logged_in = self.client.login(
+            username='member',
+            password='member-pass-123',
+        )
+        self.assertTrue(logged_in)
+
+        response = self.client.get(reverse('manage_activity'))
         self.assertEqual(response.status_code, 404)
 
     def test_user_list_includes_project_counts(self):
@@ -143,3 +149,154 @@ class StaffUserManagementTests(TestCase):
             {'action': 'delete'},
         )
         self.assertEqual(response.status_code, 400)
+
+
+class StaffActivityLogTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.staff = User.objects.create_user(
+            'admin', password='admin-pass-123', is_staff=True
+        )
+        cls.normal = User.objects.create_user(
+            'member', password='member-pass-123'
+        )
+
+        cls.created_log = ActivityLog.objects.create(
+            user=cls.normal,
+            action=ActivityLog.Action.CREATED,
+            target_type='task',
+            target_id=101,
+        )
+        cls.updated_log = ActivityLog.objects.create(
+            user=cls.staff,
+            action=ActivityLog.Action.UPDATED,
+            target_type='project',
+            target_id=202,
+        )
+        cls.deleted_log = ActivityLog.objects.create(
+            user=cls.normal,
+            action=ActivityLog.Action.DELETED,
+            target_type='task',
+            target_id=303,
+        )
+
+        # Set distinct timestamps so ordering is deterministic.
+        now = timezone.now()
+        cls.created_log.created_at = now - timedelta(minutes=3)
+        cls.created_log.save(update_fields=['created_at'])
+
+        cls.updated_log.created_at = now - timedelta(minutes=2)
+        cls.updated_log.save(update_fields=['created_at'])
+
+        cls.deleted_log.created_at = now - timedelta(minutes=1)
+        cls.deleted_log.save(update_fields=['created_at'])
+
+    def setUp(self):
+        self.client.login(username='admin', password='admin-pass-123')
+
+    def test_anonymous_user_is_redirected(self):
+        self.client.logout()
+        url = reverse('manage_activity')
+        response = self.client.get(url)
+
+        self.assertRedirects(
+            response,
+            f'{reverse("login")}?next={url}',
+            fetch_redirect_response=False,
+        )
+
+    def test_non_staff_user_gets_404(self):
+        self.client.logout()
+        self.client.login(username='member', password='member-pass-123')
+
+        response = self.client.get(reverse('manage_activity'))
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_staff_can_view_activity_logs(self):
+        response = self.client.get(reverse('manage_activity'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['logs']), 3)
+
+    def test_logs_are_ordered_newest_first(self):
+        response = self.client.get(reverse('manage_activity'))
+
+        log_ids = [log.pk for log in response.context['logs']]
+        self.assertEqual(
+            log_ids,
+            [
+                self.deleted_log.pk,
+                self.updated_log.pk,
+                self.created_log.pk,
+            ],
+        )
+
+    def test_filter_by_action(self):
+        response = self.client.get(
+            reverse('manage_activity'),
+            {'action': ActivityLog.Action.UPDATED},
+        )
+
+        self.assertEqual(
+            list(response.context['logs']),
+            [self.updated_log],
+        )
+
+    def test_search_by_username(self):
+        response = self.client.get(
+            reverse('manage_activity'), {'q': 'member'}
+        )
+
+        self.assertEqual(
+            {log.pk for log in response.context['logs']},
+            {self.created_log.pk, self.deleted_log.pk},
+        )
+
+    def test_search_by_target_type(self):
+        response = self.client.get(
+            reverse('manage_activity'), {'q': 'project'}
+        )
+
+        self.assertEqual(
+            list(response.context['logs']),
+            [self.updated_log],
+        )
+
+    def test_search_by_target_id(self):
+        response = self.client.get(
+            reverse('manage_activity'), {'q': '303'}
+        )
+
+        self.assertEqual(
+            list(response.context['logs']),
+            [self.deleted_log],
+        )
+
+    def test_empty_search_results(self):
+        response = self.client.get(
+            reverse('manage_activity'), {'q': 'no-such-user-or-object'}
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['logs']), 0)
+
+    def test_pagination(self):
+        for index in range(25):
+            ActivityLog.objects.create(
+                user=self.normal,
+                action=ActivityLog.Action.CREATED,
+                target_type='task',
+                target_id=1000 + index,
+            )
+
+        response = self.client.get(reverse('manage_activity'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['page_obj'].paginator.num_pages, 2)
+        self.assertEqual(len(response.context['logs']), 25)
+
+        response = self.client.get(
+            reverse('manage_activity'), {'page': '2'}
+        )
+        self.assertEqual(len(response.context['logs']), 3)

@@ -9,7 +9,7 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import render
 from django.utils import timezone
 
-from tracker.models import Project, Task
+from tracker.models import Project, Task, ActivityLog
 
 from .decorators import staff_required
 
@@ -76,3 +76,36 @@ def toggle_user_active(request, user_id):
         f"{'activated' if target.is_active else 'deactivated'}.",
     )
     return redirect('manage_users')
+
+@staff_required
+def activity_list(request):
+    action = request.GET.get('action', '').strip()
+    query = request.GET.get('q', '').strip()
+
+    logs = ActivityLog.objects.select_related('user').all()
+
+    valid_actions = ActivityLog.Action.values
+    if action in valid_actions:
+        logs = logs.filter(action=action)
+
+    if query:
+        search_filter = (
+            Q(user__username__icontains=query)
+            | Q(target_type__icontains=query)
+        )
+
+        if query.isdigit():
+            search_filter |= Q(target_id=int(query))
+
+        logs = logs.filter(search_filter)
+
+    paginator = Paginator(logs, 25)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
+    return render(request, 'manage_panel/activity.html', {
+        'logs': page_obj.object_list,
+        'page_obj': page_obj,
+        'selected_action': action if action in valid_actions else '',
+        'search_query': query,
+        'action_choices': ActivityLog.Action.choices,
+    })
