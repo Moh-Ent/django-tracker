@@ -1,5 +1,52 @@
 {% extends "base.html" %}
+{% block title %}Welcome{% endblock %}
 
 {% block content %}
-<h1>It works</h1>
+{% url 'project_list' as projects_url %}
+{% url 'dashboard' as dashboard_url %}
+{% url 'register' as register_url %}
+{% url 'login' as login_url %}
+
+<section class="hero">
+  <span class="hero-tag">Built for college life</span>
+  {% if user.is_authenticated %}
+    <h1>Welcome back, {{ user.username }}.</h1>
+    <p class="hero-sub">Pick up where you left off.</p>
+    <div class="actions">
+      {% if projects_url %}<a class="btn btn-primary-app btn-lg" href="{{ projects_url }}">Open my projects</a>{% endif %}
+      {% if dashboard_url %}<a class="btn btn-ghost btn-lg" href="{{ dashboard_url }}">See my dashboard</a>{% endif %}
+    </div>
+  {% else %}
+    <h1>Keep your semester under control.</h1>
+    <p class="hero-sub">Plan projects, break them into tasks, and see what is due before it turns into a problem.</p>
+    <div class="actions">
+      {% if register_url %}<a class="btn btn-primary-app btn-lg" href="{{ register_url }}">Sign up free</a>{% endif %}
+      {% if login_url %}<a class="btn btn-ghost btn-lg" href="{{ login_url }}">Log in</a>{% endif %}
+    </div>
+  {% endif %}
+</section>
+
+<div class="row g-3 mt-2">
+  <div class="col-md-4">
+    <div class="card-app feature h-100">
+      <i class="bi bi-folder2-open"></i>
+      <h2>Projects and tasks</h2>
+      <p class="muted mb-0">One project per class, club or job. Each holds its own tasks with priority and due date.</p>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card-app feature h-100">
+      <i class="bi bi-funnel"></i>
+      <h2>Find things fast</h2>
+      <p class="muted mb-0">Search and filter by status or priority, so the next thing to do is never buried.</p>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card-app feature h-100">
+      <i class="bi bi-alarm"></i>
+      <h2>Never miss a deadline</h2>
+      <p class="muted mb-0">Your dashboard shows what is overdue and what is due this week.</p>
+    </div>
+  </div>
+</div>
 {% endblock %}

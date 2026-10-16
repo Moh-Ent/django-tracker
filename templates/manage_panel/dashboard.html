@@ -1,11 +1,62 @@
 {% extends "base.html" %}
+{% block title %}Staff overview{% endblock %}
+
 {% block content %}
-<h1>Staff panel</h1>
-<ul>
-  <li>Users: {{ stats.total_users }}</li>
-  <li>Projects: {{ stats.total_projects }}</li>
-  <li>Tasks: {{ stats.total_tasks }}</li>
-  <li>Overdue: {{ stats.overdue_tasks }}</li>
-  <li>New signups this week: {{ stats.new_signups_week }}</li>
-</ul>
+<div class="page-head">
+  <div>
+    <span class="staff-badge"><i class="bi bi-shield-lock"></i> Staff only</span>
+    <h1>Staff panel</h1>
+    <p class="muted mb-0">A quick look at how the app is being used.</p>
+  </div>
+</div>
+
+{% include "manage_panel/_subnav.html" with active="overview" %}
+
+<div class="row row-cols-2 row-cols-md-3 row-cols-xl-5 g-3 mb-4">
+  <div class="col">
+    <div class="card-app stat-card stat-users">
+      <span class="stat-icon"><i class="bi bi-people"></i></span>
+      <div><div class="stat-num">{{ stats.total_users }}</div><div class="stat-label">Users</div></div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card-app stat-card stat-projects">
+      <span class="stat-icon"><i class="bi bi-folder2"></i></span>
+      <div><div class="stat-num">{{ stats.total_projects }}</div><div class="stat-label">Projects</div></div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card-app stat-card stat-tasks">
+      <span class="stat-icon"><i class="bi bi-list-check"></i></span>
+      <div><div class="stat-num">{{ stats.total_tasks }}</div><div class="stat-label">Tasks</div></div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card-app stat-card stat-overdue">
+      <span class="stat-icon"><i class="bi bi-exclamation-lg"></i></span>
+      <div><div class="stat-num">{{ stats.overdue_tasks }}</div><div class="stat-label">Overdue tasks</div></div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card-app stat-card stat-signups">
+      <span class="stat-icon"><i class="bi bi-person-plus"></i></span>
+      <div><div class="stat-num">{{ stats.new_signups_week }}</div><div class="stat-label">New this week</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-md-6">
+    <a class="card-app link-card" href="{% url 'manage_users' %}">
+      <i class="bi bi-people"></i>
+      <span><strong>Manage users</strong><br><span class="muted">See everyone, and activate or deactivate accounts.</span></span>
+    </a>
+  </div>
+  <div class="col-md-6">
+    <a class="card-app link-card" href="{% url 'manage_log' %}">
+      <i class="bi bi-clock-history"></i>
+      <span><strong>Activity log</strong><br><span class="muted">Who created, changed or deleted what, and when.</span></span>
+    </a>
+  </div>
+</div>
 {% endblock %}
