@@ -5,11 +5,12 @@ from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from django.http import JsonResponse
 
 from .activity import log_action
 from .forms import CommentForm, ProjectForm, TaskForm
 from .models import ActivityLog, Comment, Project, Task
-from .utils import count_by_status, days_until_due, is_overdue
+from .utils import count_by_status, days_until_due, is_overdue, task_to_dict
 
 def home(request):
     return render(request, 'home.html')
@@ -186,6 +187,30 @@ def comment_delete(request, pk):
     comment.delete()
     messages.success(request, 'Comment deleted.')
     return redirect('task_detail', pk=task_pk)
+
+@login_required
+def project_tasks_api(request, pk):
+    project = get_object_or_404(
+        Project,
+        pk=pk,
+        owner=request.user,
+    )
+
+    tasks = project.tasks.all()
+
+    status = request.GET.get('status', '').strip()
+    if status:
+        if status not in Task.Status.values:
+            return JsonResponse(
+                {'error': 'Invalid status.'},
+                status=400,
+            )
+        tasks = tasks.filter(status=status)
+
+    return JsonResponse(
+        [task_to_dict(task) for task in tasks],
+        safe=False,
+    )
 
 @login_required
 def dashboard(request):

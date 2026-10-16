@@ -15,4 +15,5 @@ urlpatterns = [
     path('tasks/<int:pk>/advance/', views.task_advance, name='task_advance'),
     path('comments/<int:pk>/delete/', views.comment_delete, name='comment_delete'),
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('api/projects/<int:pk>/tasks/', views.project_tasks_api, name='project_tasks_api'),
 ]

@@ -169,3 +169,60 @@ class ProjectSearchTests(BaseTestCase):
         response = self.client.get(reverse('project_list'), {'q': 'Alice'})
         names = [p.name for p in response.context['page_obj']]
         self.assertEqual(names, ['Alice-themed project'])
+
+
+class ProjectTasksAPITests(BaseTestCase):
+    def test_owner_receives_task_json(self):
+        self.client.login(username='alice', password='alice-pass-123')
+
+        response = self.client.get(
+            reverse('project_tasks_api', args=[self.project.pk])
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), [{
+            'id': self.task.pk,
+            'title': 'Alice task',
+            'status': 'todo',
+            'priority': 'medium',
+            'due_date': None,
+        }])
+
+    def test_status_filter_returns_matching_tasks(self):
+        Task.objects.create(
+            project=self.project,
+            title='Doing task',
+            status=Task.Status.DOING,
+        )
+        self.client.login(username='alice', password='alice-pass-123')
+
+        response = self.client.get(
+            reverse('project_tasks_api', args=[self.project.pk]),
+            {'status': 'doing'},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            [task['title'] for task in response.json()],
+            ['Doing task'],
+        )
+
+    def test_invalid_status_returns_400(self):
+        self.client.login(username='alice', password='alice-pass-123')
+
+        response = self.client.get(
+            reverse('project_tasks_api', args=[self.project.pk]),
+            {'status': 'invalid'},
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {'error': 'Invalid status.'})
+
+    def test_other_user_gets_404(self):
+        self.client.login(username='bob', password='bob-pass-123')
+
+        response = self.client.get(
+            reverse('project_tasks_api', args=[self.project.pk])
+        )
+
+        self.assertEqual(response.status_code, 404)
