@@ -24,8 +24,14 @@
     <option value="updated" {% if filters.action == "updated" %}selected{% endif %}>Updated</option>
     <option value="deleted" {% if filters.action == "deleted" %}selected{% endif %}>Deleted</option>
   </select>
-  <input type="date" name="date_from" value="{{ filters.date_from }}" class="form-control" style="flex: 0 1 170px; width: auto;" aria-label="From date">
-  <input type="date" name="date_to" value="{{ filters.date_to }}" class="form-control" style="flex: 0 1 170px; width: auto;" aria-label="To date">
+  <label class="date-field">
+    <span>From</span>
+    <input type="date" name="date_from" value="{{ filters.date_from }}" class="form-control">
+  </label>
+  <label class="date-field">
+    <span>To</span>
+    <input type="date" name="date_to" value="{{ filters.date_to }}" class="form-control">
+  </label>
   <button class="btn btn-primary-app" type="submit">Filter</button>
   {% if filters.q or filters.user or filters.action or filters.date_from or filters.date_to %}
     <a class="btn btn-ghost" href="{{ request.path }}">Clear</a>
