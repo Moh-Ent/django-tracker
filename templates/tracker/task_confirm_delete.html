@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Delete task{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="card-app auth-card danger-card">
+    <h1>Delete this task?</h1>
+    <p class="auth-sub">
+      <strong>{{ task.title }}</strong> in {{ task.project.name }}
+      {% if task.comments.count %}and its {{ task.comments.count }} comment{{ task.comments.count|pluralize }} {% endif %}will be removed for good.
+      This cannot be undone.
+    </p>
+
+    {# No action attribute: the form posts back to this same URL, which deletes the task #}
+    <form method="post">
+      {% csrf_token %}
+      <div class="actions">
+        <button type="submit" class="btn btn-danger-app">Yes, delete it</button>
+        <a class="btn btn-ghost" href="{% url 'task_detail' task.pk %}">Keep it</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

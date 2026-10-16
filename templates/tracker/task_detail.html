@@ -18,10 +18,8 @@
     </div>
   </div>
   <div class="actions">
-    {# Optional: appears only once Moh adds a URL named task_advance (POST) #}
-    {% url 'task_advance' task.pk as advance_url %}
-    {% if advance_url and task.status != 'done' %}
-    <form method="post" action="{{ advance_url }}">
+    {% if task.status != 'done' %}
+    <form method="post" action="{% url 'task_advance' task.pk %}">
       {% csrf_token %}
       <button type="submit" class="btn btn-primary-app">
         {% if task.status == 'todo' %}Start task{% else %}Mark as done{% endif %}
@@ -29,6 +27,7 @@
     </form>
     {% endif %}
     <a class="btn btn-ghost" href="{% url 'task_update' task.pk %}">Edit</a>
+    <a class="btn btn-ghost" href="{% url 'task_delete' task.pk %}">Delete</a>
   </div>
 </div>
 
@@ -45,14 +44,10 @@
       <span><span class="comment-author">{{ comment.author.username }}</span>
         <span class="comment-date">&middot; {{ comment.created_at|date:"M j, H:i" }}</span></span>
       {% if comment.author == user %}
-        {# Optional: appears only once Moh adds a URL named comment_delete (POST) #}
-        {% url 'comment_delete' comment.pk as delete_url %}
-        {% if delete_url %}
-        <form method="post" action="{{ delete_url }}">
+        <form method="post" action="{% url 'comment_delete' comment.pk %}">
           {% csrf_token %}
           <button type="submit" class="btn-link-danger">Delete</button>
         </form>
-        {% endif %}
       {% endif %}
     </div>
     <p>{{ comment.body }}</p>
