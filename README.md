@@ -5,8 +5,6 @@ A small Trello-style task tracker built with Django. Each user keeps private pro
 **Live demo:** (https://django-tracker-xxmr.onrender.com/)
 (Free hosting: the first visit after a quiet period can take up to a minute to wake up.)
 
-
-
 ## Demo accounts
 
 | Account | Role | Password |
@@ -60,7 +58,7 @@ python manage.py seed_demo        # creates demo and staffdemo with sample data
 python manage.py runserver
 ```
 
-Open http://127.0.0.1:8000/. Without `DEMO_PASSWORD` set, the demo accounts use the password `demo-pass-123`. This is for local use only. To make your own admin account, run `python manage.py createsuperuser`.
+Open http://127.0.0.1:8000/. Without `DEMO_PASSWORD` set, the demo accounts use the password `demo`. This is for local use only. To make your own admin account, run `python manage.py createsuperuser`.
 
 Run the tests:
 
@@ -80,7 +78,7 @@ python tools/check_templates.py
 |---|---|
 | `DJANGO_DEBUG` | `False` |
 | `DJANGO_SECRET_KEY` | a long random string |
-| `DEMO_PASSWORD` | the password for the demo accounts |
+| `DEMO_PASSWORD` | the password for the demo accounts (this demo uses `demo`) |
 | `PYTHON_VERSION` | `3.13.5` |
 
 `build.sh` installs the requirements, collects static files, runs migrations and loads the demo data. SQLite is used, so data resets on each redeploy.
